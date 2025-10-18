@@ -1,0 +1,95 @@
+# Machine Learning Classification Project Configuration
+
+data:
+  raw_path: data/raw
+  processed_path: data/processed
+  test_size: 0.2
+  random_state: 42
+  preprocessing:
+    handle_missing: true
+    encode_categorical: true
+    scale_features: true
+
+models:
+  logistic_regression:
+    sklearn:
+      random_state: 42
+      max_iter: 1000
+    tensorflow:
+      learning_rate: 0.01
+      epochs: 100
+      batch_size: 32
+    pytorch:
+      learning_rate: 0.01
+      epochs: 100
+      batch_size: 32
+
+  decision_tree:
+    sklearn:
+      random_state: 42
+      max_depth: null
+      min_samples_split: 2
+      min_samples_leaf: 1
+      criterion: gini
+    pytorch:
+      learning_rate: 0.01
+      epochs: 100
+      batch_size: 32
+
+  cnn:
+    tensorflow:
+      learning_rate: 0.001
+      epochs: 100
+      batch_size: 32
+      lstm_units: 128
+    pytorch:
+      learning_rate: 0.001
+      epochs: 100
+      batch_size: 32
+      hidden_size: 128
+
+  lstm:
+    tensorflow:
+      learning_rate: 0.001
+      epochs: 100
+      batch_size: 32
+      lstm_units: 128
+    pytorch:
+      learning_rate: 0.001
+      epochs: 100
+      batch_size: 32
+      hidden_size: 128
+
+  kmeans:
+    sklearn:
+      n_clusters: 8
+      random_state: 42
+      max_iter: 300
+      init: k-means++
+      n_init: 10
+
+training:
+  validation_split: 0.2
+  early_stopping:
+    patience: 10
+    monitor: val_loss
+  callbacks:
+    reduce_lr:
+      factor: 0.5
+      patience: 5
+      min_lr: 1e-7
+
+evaluation:
+  metrics:
+    - accuracy
+    - precision
+    - recall
+    - f1_score
+  cross_validation:
+    cv: 5
+    scoring: accuracy
+
+paths:
+  models: models
+  reports: reports
+  logs: logs
