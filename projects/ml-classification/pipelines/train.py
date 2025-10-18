@@ -33,6 +33,14 @@ from algorithms.nlp.lstm.tensorflow_impl import LSTMTensorFlow
 from algorithms.nlp.lstm.pytorch_impl import LSTMPyTorch
 from algorithms.clustering.kmeans.sklearn_impl import KMeansSklearn
 
+# Import new algorithms
+from algorithms.classification.svm.sklearn_impl import SVMSklearn
+from algorithms.classification.random_forest.sklearn_impl import RandomForestSklearn
+from algorithms.classification.knn.sklearn_impl import KNNSklearn
+from algorithms.classification.naive_bayes.sklearn_impl import NaiveBayesSklearn
+from algorithms.classification.mlp.tensorflow_impl import MLPTensorFlow
+from algorithms.classification.adaboost.sklearn_impl import AdaBoostSklearn
+
 
 class MLPipeline:
     """
@@ -220,6 +228,30 @@ class MLPipeline:
             if implementation == 'sklearn':
                 return KMeansSklearn(**config)
                 
+        elif algorithm == 'svm':
+            if implementation == 'sklearn':
+                return SVMSklearn(**config)
+                
+        elif algorithm == 'random_forest':
+            if implementation == 'sklearn':
+                return RandomForestSklearn(**config)
+                
+        elif algorithm == 'knn':
+            if implementation == 'sklearn':
+                return KNNSklearn(**config)
+                
+        elif algorithm == 'naive_bayes':
+            if implementation == 'sklearn':
+                return NaiveBayesSklearn(**config)
+                
+        elif algorithm == 'mlp':
+            if implementation == 'tensorflow':
+                return MLPTensorFlow(**config)
+                
+        elif algorithm == 'adaboost':
+            if implementation == 'sklearn':
+                return AdaBoostSklearn(**config)
+                
         else:
             raise ValueError(f"Unsupported algorithm: {algorithm}")
             
@@ -346,7 +378,8 @@ def main():
     """
     parser = argparse.ArgumentParser(description='Machine Learning Training Pipeline')
     parser.add_argument('--algorithm', type=str, required=True,
-                      choices=['logistic_regression', 'decision_tree', 'cnn', 'lstm', 'kmeans'],
+                      choices=['logistic_regression', 'decision_tree', 'cnn', 'lstm', 'kmeans', 
+                              'svm', 'random_forest', 'knn', 'naive_bayes', 'mlp', 'adaboost'],
                       help='Algorithm to train')
     parser.add_argument('--implementation', type=str, required=True,
                       choices=['sklearn', 'tensorflow', 'pytorch'],
