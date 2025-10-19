@@ -120,6 +120,12 @@ class SMSClassifierAPI:
         else:
             self.results_dir = Path(results_dir)
             
+        # Create results directory and subdirectories if they don't exist
+        self.results_dir.mkdir(exist_ok=True)
+        (self.results_dir / "models").mkdir(exist_ok=True)
+        (self.results_dir / "visualizations").mkdir(exist_ok=True)
+        (self.results_dir / "reports").mkdir(exist_ok=True)
+            
         self.models = {}
         self.vectorizers = {}
         self.model_info = {}
@@ -146,8 +152,8 @@ class SMSClassifierAPI:
         # Check for all available algorithm models
         for model_name, algorithm_class in self.algorithm_classes.items():
             try:
-                model_path = self.results_dir / f"{model_name}_model.pkl"
-                vectorizer_path = self.results_dir / f"{model_name}_vectorizer.pkl"
+                model_path = self.results_dir / "models" / f"{model_name}_model.pkl"
+                vectorizer_path = self.results_dir / "models" / f"{model_name}_vectorizer.pkl"
                 
                 if model_path.exists() and vectorizer_path.exists():
                     # Create algorithm instance

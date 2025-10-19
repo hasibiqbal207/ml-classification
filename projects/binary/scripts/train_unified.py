@@ -56,6 +56,11 @@ class UniversalModelTrainer:
         # Create results directory
         self.results_dir.mkdir(exist_ok=True)
         
+        # Create subdirectories for organized storage
+        (self.results_dir / "models").mkdir(exist_ok=True)
+        (self.results_dir / "visualizations").mkdir(exist_ok=True)
+        (self.results_dir / "reports").mkdir(exist_ok=True)
+        
         # Available algorithms mapping
         self.available_algorithms = {
             'naive_bayes': {
@@ -226,7 +231,7 @@ class UniversalModelTrainer:
             if hasattr(self.model, 'plot_confusion_matrix'):
                 self.model.plot_confusion_matrix(
                     X_val_transformed.toarray(), y_val,
-                    save_path=str(self.results_dir / f"{self.algorithm_name}_validation_confusion_matrix.png")
+                    save_path=str(self.results_dir / "visualizations" / f"{self.algorithm_name}_validation_confusion_matrix.png")
                 )
         
         logger.info(f"{self.algorithm_name} model training completed!")
@@ -258,19 +263,19 @@ class UniversalModelTrainer:
         if hasattr(self.model, 'plot_confusion_matrix'):
             self.model.plot_confusion_matrix(
                 X_test_transformed.toarray(), y_test,
-                save_path=str(self.results_dir / f"{self.algorithm_name}_test_confusion_matrix.png")
+                save_path=str(self.results_dir / "visualizations" / f"{self.algorithm_name}_test_confusion_matrix.png")
             )
         
         # Generate additional visualizations if available
         if hasattr(self.model, 'plot_feature_importance'):
             self.model.plot_feature_importance(
-                save_path=str(self.results_dir / f"{self.algorithm_name}_feature_importance.png")
+                save_path=str(self.results_dir / "visualizations" / f"{self.algorithm_name}_feature_importance.png")
             )
         
         if hasattr(self.model, 'plot_learning_curve'):
             self.model.plot_learning_curve(
                 X_test_transformed.toarray(), y_test,
-                save_path=str(self.results_dir / f"{self.algorithm_name}_learning_curve.png")
+                save_path=str(self.results_dir / "visualizations" / f"{self.algorithm_name}_learning_curve.png")
             )
         
         logger.info(f"{self.algorithm_name} model evaluation completed!")
@@ -287,16 +292,16 @@ class UniversalModelTrainer:
         
         # Save model using the algorithm class's built-in method
         if hasattr(self.model, 'save_model'):
-            model_path = self.results_dir / f"{self.algorithm_name}_model.pkl"
+            model_path = self.results_dir / "models" / f"{self.algorithm_name}_model.pkl"
             self.model.save_model(str(model_path))
         else:
             # Fallback to manual saving
-            model_path = self.results_dir / f"{self.algorithm_name}_model.pkl"
+            model_path = self.results_dir / "models" / f"{self.algorithm_name}_model.pkl"
             with open(model_path, 'wb') as f:
                 pickle.dump(self.model, f)
         
         # Save vectorizer
-        vectorizer_path = self.results_dir / f"{self.algorithm_name}_vectorizer.pkl"
+        vectorizer_path = self.results_dir / "models" / f"{self.algorithm_name}_vectorizer.pkl"
         with open(vectorizer_path, 'wb') as f:
             pickle.dump(self.vectorizer, f)
         
@@ -336,8 +341,8 @@ class UniversalModelTrainer:
             'algorithm': algorithm_name,
             'training': train_results,
             'test': test_results,
-            'model_path': str(self.results_dir / f"{algorithm_name}_model.pkl"),
-            'vectorizer_path': str(self.results_dir / f"{algorithm_name}_vectorizer.pkl")
+            'model_path': str(self.results_dir / "models" / f"{algorithm_name}_model.pkl"),
+            'vectorizer_path': str(self.results_dir / "models" / f"{algorithm_name}_vectorizer.pkl")
         }
         
         logger.info(f"Complete pipeline finished for {algorithm_name}")

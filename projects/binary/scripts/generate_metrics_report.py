@@ -68,8 +68,8 @@ class MetricsGenerator:
         print(f"\nLoading {model_name} model...")
         
         # Load model and vectorizer
-        model_path = self.results_dir / f"{model_name}_model.pkl"
-        vectorizer_path = self.results_dir / f"{model_name}_vectorizer.pkl"
+        model_path = self.results_dir / "models" / f"{model_name}_model.pkl"
+        vectorizer_path = self.results_dir / "models" / f"{model_name}_vectorizer.pkl"
         
         if not model_path.exists() or not vectorizer_path.exists():
             print(f"Model files not found for {model_name}")

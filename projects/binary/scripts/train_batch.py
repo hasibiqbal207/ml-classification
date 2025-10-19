@@ -94,7 +94,7 @@ class BatchTrainer:
             
             # Check if model already exists
             if skip_existing:
-                model_path = Path(self.results_dir) / f"{algorithm}_model.pkl"
+                model_path = Path(self.results_dir) / "models" / f"{algorithm}_model.pkl"
                 if model_path.exists():
                     logger.info(f"Skipping {algorithm} - model already exists")
                     continue
