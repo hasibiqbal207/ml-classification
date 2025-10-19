@@ -173,7 +173,7 @@ class RandomForestSklearn:
             'probabilities': probabilities
         }
         
-    def plot_feature_importance(self, feature_names=None, top_n=20, title="Random Forest Feature Importance"):
+    def plot_feature_importance(self, feature_names=None, top_n=20, title="Random Forest Feature Importance", save_path=None):
         """
         Plot feature importance.
         
@@ -181,6 +181,7 @@ class RandomForestSklearn:
             feature_names (list): Names of features
             top_n (int): Number of top features to show
             title (str): Plot title
+            save_path (str): Path to save the plot (optional)
         """
         if not self.is_fitted:
             raise ValueError("Model must be fitted before plotting feature importance")
@@ -200,7 +201,12 @@ class RandomForestSklearn:
         plt.title(title)
         plt.gca().invert_yaxis()
         plt.tight_layout()
-        plt.show()
+        
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.close()
+        else:
+            plt.show()
         
     def plot_tree_depth_distribution(self, title="Random Forest Tree Depth Distribution"):
         """
