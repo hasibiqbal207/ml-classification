@@ -29,40 +29,46 @@ python scripts/preprocess_data.py
 python scripts/preprocess_data.py --min-freq 3 --train-ratio 0.8 --val-ratio 0.1 --test-ratio 0.1
 ```
 
-### Model Training
+### Model Training (NEW UNIFIED APPROACH!)
 
-#### 1. Naive Bayes (Recommended - Best Performance)
+#### Single Algorithm Training
 ```bash
-# Train Naive Bayes model (fastest, best for text classification)
-python scripts/train_naive_bayes.py
+# Train any available algorithm
+python scripts/train_unified.py --algorithm naive_bayes
+python scripts/train_unified.py --algorithm logistic_regression
+python scripts/train_unified.py --algorithm random_forest
+python scripts/train_unified.py --algorithm svm
+python scripts/train_unified.py --algorithm knn
+python scripts/train_unified.py --algorithm adaboost
+python scripts/train_unified.py --algorithm decision_tree
+
+# With hyperparameter tuning
+python scripts/train_unified.py --algorithm svm --tuning
 
 # With custom parameters
-python scripts/train_naive_bayes.py --vectorizer tfidf --alpha 0.5 --variant multinomial
+python scripts/train_unified.py --algorithm naive_bayes --params alpha=0.5 variant=multinomial
 ```
 
-#### 2. Logistic Regression
+#### Batch Training (Multiple Algorithms)
 ```bash
-# Train Logistic Regression with hyperparameter tuning
-python scripts/train_logistic_regression.py
+# Train multiple algorithms at once
+python scripts/train_batch.py --algorithms naive_bayes logistic_regression random_forest
 
-# Skip hyperparameter tuning for faster execution
-python scripts/train_logistic_regression.py --no-tuning
+# Train all available algorithms
+python scripts/train_batch.py
 
-# With custom parameters
-python scripts/train_logistic_regression.py --vectorizer count --no-tuning
+# Skip existing models
+python scripts/train_batch.py --no-skip
 ```
 
-#### 3. Random Forest
-```bash
-# Train Random Forest with hyperparameter tuning
-python scripts/train_random_forest.py
-
-# Skip hyperparameter tuning for faster execution
-python scripts/train_random_forest.py --no-tuning
-
-# With custom parameters
-python scripts/train_random_forest.py --vectorizer count --no-tuning
-```
+#### Available Algorithms
+- **naive_bayes**: Multinomial Naive Bayes (fastest, best for text)
+- **logistic_regression**: Linear classifier with regularization
+- **random_forest**: Ensemble of decision trees
+- **svm**: Support Vector Machine with linear kernel
+- **knn**: K-Nearest Neighbors
+- **adaboost**: Adaptive Boosting ensemble
+- **decision_tree**: Single decision tree
 
 ### Generate Metrics Report
 ```bash
@@ -75,13 +81,15 @@ python scripts/generate_metrics_report.py --model logistic_regression
 python scripts/generate_metrics_report.py --model random_forest
 ```
 
-### Complete Pipeline
+### Complete Pipeline (NEW UNIFIED APPROACH!)
 ```bash
 # Run the complete pipeline from preprocessing to metrics generation
 python scripts/preprocess_data.py
-python scripts/train_naive_bayes.py
-python scripts/train_logistic_regression.py --no-tuning
-python scripts/train_random_forest.py --no-tuning
+
+# Train multiple algorithms at once
+python scripts/train_batch.py --algorithms naive_bayes logistic_regression random_forest svm knn
+
+# Generate comprehensive metrics report
 python scripts/generate_metrics_report.py
 ```
 
@@ -115,10 +123,13 @@ projects/binary/
 │   └── DATASET_DOCUMENTATION.md        # Dataset documentation
 ├── scripts/
 │   ├── preprocess_data.py              # Data preprocessing script
-│   ├── train_naive_bayes.py            # Naive Bayes training
-│   ├── train_logistic_regression.py    # Logistic Regression training
-│   ├── train_random_forest.py          # Random Forest training
-│   └── generate_metrics_report.py      # Comprehensive metrics generation
+│   ├── train_unified.py                # Universal model trainer (NEW!)
+│   ├── train_batch.py                  # Batch model trainer (NEW!)
+│   ├── generate_metrics_report.py      # Comprehensive metrics generation
+│   └── legacy/                         # Old training scripts (deprecated)
+│       ├── train_naive_bayes.py
+│       ├── train_logistic_regression.py
+│       └── train_random_forest.py
 ├── api/                                # Real-time API (NEW!)
 │   ├── sms_api.py                      # FastAPI application
 │   ├── test_api.py                     # API testing suite

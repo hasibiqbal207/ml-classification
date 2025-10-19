@@ -31,9 +31,14 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.append(str(project_root))
 
+# Import all available algorithm classes
 from algorithms.naive_bayes.sklearn_impl import NaiveBayesSklearn
 from algorithms.logistic_regression.sklearn_impl import LogisticRegressionSklearn
 from algorithms.random_forest.sklearn_impl import RandomForestSklearn
+from algorithms.svm.sklearn_impl import SVMSklearn
+from algorithms.knn.sklearn_impl import KNNSklearn
+from algorithms.adaboost.sklearn_impl import AdaBoostSklearn
+from algorithms.decision_tree.sklearn_impl import DecisionTreeSklearn
 
 # Configure logging
 logging.basicConfig(
@@ -101,7 +106,7 @@ class HealthResponse(BaseModel):
     uptime_seconds: float
 
 class SMSClassifierAPI:
-    """SMS Classification API service."""
+    """SMS Classification API service using algorithm classes."""
     
     def __init__(self, results_dir: str = None):
         """
@@ -120,32 +125,54 @@ class SMSClassifierAPI:
         self.model_info = {}
         self.start_time = datetime.now()
         
+        # Algorithm class mapping
+        self.algorithm_classes = {
+            'naive_bayes': NaiveBayesSklearn,
+            'logistic_regression': LogisticRegressionSklearn,
+            'random_forest': RandomForestSklearn,
+            'svm': SVMSklearn,
+            'knn': KNNSklearn,
+            'adaboost': AdaBoostSklearn,
+            'decision_tree': DecisionTreeSklearn
+        }
+        
         # Load all available models
         self.load_models()
         
     def load_models(self):
-        """Load all available trained models."""
-        logger.info("Loading trained models...")
+        """Load all available trained models using algorithm classes."""
+        logger.info("Loading trained models using algorithm classes...")
         
-        model_names = ['naive_bayes', 'logistic_regression', 'random_forest']
-        
-        for model_name in model_names:
+        # Check for all available algorithm models
+        for model_name, algorithm_class in self.algorithm_classes.items():
             try:
-                # Load model
                 model_path = self.results_dir / f"{model_name}_model.pkl"
                 vectorizer_path = self.results_dir / f"{model_name}_vectorizer.pkl"
                 
                 if model_path.exists() and vectorizer_path.exists():
-                    with open(model_path, 'rb') as f:
-                        self.models[model_name] = pickle.load(f)
+                    # Create algorithm instance
+                    algorithm_instance = algorithm_class()
                     
+                    # Load model using algorithm class's built-in method
+                    if hasattr(algorithm_instance, 'load_model'):
+                        algorithm_instance.load_model(str(model_path))
+                    else:
+                        # Fallback to manual loading
+                        with open(model_path, 'rb') as f:
+                            algorithm_instance = pickle.load(f)
+                    
+                    # Load vectorizer
                     with open(vectorizer_path, 'rb') as f:
-                        self.vectorizers[model_name] = pickle.load(f)
+                        vectorizer = pickle.load(f)
+                    
+                    # Store model and vectorizer
+                    self.models[model_name] = algorithm_instance
+                    self.vectorizers[model_name] = vectorizer
                     
                     # Load model performance info
                     self.model_info[model_name] = self._get_model_performance(model_name)
                     
-                    logger.info(f"Successfully loaded {model_name} model")
+                    logger.info(f"Successfully loaded {model_name} model using {algorithm_class.__name__}")
                 else:
                     logger.warning(f"Model files not found for {model_name}")
                     
@@ -156,8 +183,8 @@ class SMSClassifierAPI:
         
     def _get_model_performance(self, model_name: str) -> Dict:
         """Get model performance metrics."""
-        # These would ideally be loaded from a metrics file
-        # For now, using the known performance from our training
+        # These would ideally be loaded from a metrics file or computed dynamically
+        # For now, using known performance from training
         performance_data = {
             'naive_bayes': {
                 'accuracy': 0.9869,
@@ -179,6 +206,34 @@ class SMSClassifierAPI:
                 'recall': 0.8319,
                 'f1_score': 0.9082,
                 'roc_auc': 0.9979
+            },
+            'svm': {
+                'accuracy': 0.0,  # Will be updated after training
+                'precision': 0.0,
+                'recall': 0.0,
+                'f1_score': 0.0,
+                'roc_auc': 0.0
+            },
+            'knn': {
+                'accuracy': 0.0,  # Will be updated after training
+                'precision': 0.0,
+                'recall': 0.0,
+                'f1_score': 0.0,
+                'roc_auc': 0.0
+            },
+            'adaboost': {
+                'accuracy': 0.0,  # Will be updated after training
+                'precision': 0.0,
+                'recall': 0.0,
+                'f1_score': 0.0,
+                'roc_auc': 0.0
+            },
+            'decision_tree': {
+                'accuracy': 0.0,  # Will be updated after training
+                'precision': 0.0,
+                'recall': 0.0,
+                'f1_score': 0.0,
+                'roc_auc': 0.0
             }
         }
         
@@ -220,7 +275,7 @@ class SMSClassifierAPI:
         
     def predict_single_sync(self, message: SMSMessage, model_name: str = 'naive_bayes') -> PredictionResponse:
         """
-        Synchronous version of predict_single for direct testing.
+        Synchronous version of predict_single using algorithm classes.
         
         Args:
             message: SMS message to classify
@@ -242,10 +297,18 @@ class SMSClassifierAPI:
             vectorizer = self.vectorizers[model_name]
             X = vectorizer.transform([processed_text])
             
-            # Make prediction
+            # Make prediction using algorithm class
             model = self.models[model_name]
+            
+            # Use algorithm class's predict method
             prediction = model.predict(X.toarray())[0]
-            probability = model.predict_proba(X.toarray())[0]
+            
+            # Use algorithm class's predict_proba method
+            if hasattr(model, 'predict_proba'):
+                probability = model.predict_proba(X.toarray())[0]
+            else:
+                # Fallback for models without probability prediction
+                probability = [0.5, 0.5]  # Default probabilities
             
             # Convert prediction to string
             prediction_str = 'spam' if prediction == 1 else 'ham'
@@ -399,7 +462,7 @@ async def health_check():
         status="healthy" if len(api_service.models) > 0 else "degraded",
         timestamp=datetime.now(),
         models_loaded=len(api_service.models),
-        total_models=3,
+        total_models=len(api_service.algorithm_classes),
         uptime_seconds=uptime
     )
 
@@ -500,7 +563,9 @@ async def get_stats():
     """Get API usage statistics."""
     return {
         "models_loaded": len(api_service.models),
+        "total_available": len(api_service.algorithm_classes),
         "available_models": list(api_service.models.keys()),
+        "all_algorithm_classes": list(api_service.algorithm_classes.keys()),
         "uptime_seconds": (datetime.now() - api_service.start_time).total_seconds(),
         "api_version": "1.0.0"
     }
